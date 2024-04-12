@@ -1,7 +1,34 @@
-import Image from "next/image";
+"use client";
+
+import { PostData } from "@/domain/posts/post";
+import { GetStaticProps } from "next";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+const getStaticProps: GetStaticProps = async () => {
+  const posts = await getPosts();
+
+  return {
+    props: { posts },
+  };
+};
+
+// { data }: PostData
+
+const getPosts = async (): Promise<PostData> => {
+  const posts = await fetch("http://localhost:1337/api/posts");
+  const jsonPosts = await posts.json();
+  return jsonPosts;
+};
 
 export default function Home() {
+  const [posts, setPosts] = useState<PostData>();
+
+  useEffect(() => {
+    getPosts().then((response) => setPosts(response));
+    console.log(posts);
+  }, [posts]);
+
   return (
     <>
       <a href="#main" className="skip-link">
@@ -16,8 +43,10 @@ export default function Home() {
           </h2>
           <p>
             {" "}
-            Feito por <a href="https://moderncss.dev"> Lucas Conti</a> {" "}
-            a partir da CodePen do <a href="https://twitter.com/5t3ph">Stephanie Eckles</a>
+            Feito por <a href="https://moderncss.dev"> Lucas Conti</a>{" "}
+          </p>
+          <p>
+            CodePen do <a href="https://twitter.com/5t3ph">Stephanie Eckles</a>
           </p>
           <a href="https://github.com/lucasconti888" className="link-github">
             <span>
@@ -29,8 +58,8 @@ export default function Home() {
               >
                 <path d="M32 12.408l-11.056-1.607-4.944-10.018-4.944 10.018-11.056 1.607 8 7.798-1.889 11.011 9.889-5.199 9.889 5.199-1.889-11.011 8-7.798z"></path>
               </svg>
-            </span>
-            {" "} Github
+            </span>{" "}
+            Github
           </a>
         </div>
       </header>
@@ -49,7 +78,7 @@ export default function Home() {
             <a href="#files">Files</a>
           </li>
           <li>
-            <Link href="/cabinet">Cabinete</Link>
+            <Link href="/test">Cabinete</Link>
           </li>
           <li>
             <a href="/resources/">Resources</a>
@@ -61,40 +90,18 @@ export default function Home() {
         <div className="container">
           <article id="about">
             <section className="container">
-              <h2>Setting the Stage</h2>
+              <h2>Coletando da API</h2>
               <p>
-                In 2003,{" "}
-                <a href="http://daveshea.com/projects/zen/">Dave Shea</a> began
-                a legendary project called{" "}
-                <a href="http://www.csszengarden.com/">CSS Zen Garden</a> that
-                provided a demonstration of "what can be accomplished through
-                CSS-based design" until submissions stopped in 2013.
-              </p>
-              <p>
-                <strong>Style Stage</strong> seeks to rekindle that spirit by
-                providing this page as the base HTML for contributors - like
-                you! - to re-style by submitting an alternate stylesheet.
+                Abaixo, os dados coletados da API são mapeados a fim de testar o
+                funcionamento do fetch. Um problema que foi identificado é que o
+                método funciona normalmente e deixa de funcionar de forma
+                aleatória, sem um motivo aparente.
               </p>
               <blockquote>
-                <p>
-                  <strong>How it works:</strong> Visit the
-                  <a href="/styles/">"All Styles"</a> directory page and select
-                  a style to view. A page with identical content to this one
-                  will be presented with a new design provided from a
-                  contributed stylesheet. CSS practitioners of any skill level
-                  are invited to
-                  <a href="#contribute">submit a stylesheet</a>!
-                </p>
+                {posts?.data.map((post) => (
+                  <p key={post.attributes.slug}>{post.attributes.title}</p>
+                ))}
               </blockquote>
-              <p>
-                The HTML for this page was created to be semantic, accessible,
-                and free of nearly all other opinions. Nested sectioning
-                elements with the className `.container` serve as additional
-                style aids since you do not have access to alter the base HTML.
-                IDs are included where needed for nav anchors or accessibility,
-                and a small number of additional classNamees are provided for
-                key elements without IDs. Don't forget the `.skip-link`!
-              </p>
             </section>
             <section className="container">
               <h2>Modern CSS Under the Spotlight</h2>
@@ -108,20 +115,6 @@ export default function Home() {
                 <li>Flexbox</li>
                 <li>Grid</li>
                 <li>custom variables</li>
-                <li>@supports()</li>
-                <li>gradients</li>
-                <li>animation</li>
-                <li>3D transforms</li>
-                <li>object-fit</li>
-                <li>:focus-within</li>
-                <li>calc()</li>
-                <li>min() / max() / clamp()</li>
-                <li>viewport units</li>
-                <li>scroll-(margin/padding/snap)</li>
-                <li>position: sticky</li>
-                <li>two-value display</li>
-                <li>expanded media query values</li>
-                <li>variable fonts</li>
               </ul>
               <p>
                 We also collectively have an improved understanding of what it
@@ -149,26 +142,7 @@ export default function Home() {
                 </a>
                 as well as attribution using the metadata you provide. You may
                 use any build setup you prefer, but the final submission should
-                be the compiled, unminified CSS. You retain the copyright to
-                original graphics and must ensure all graphics used are
-                appropriately licensed. All asset links, including fonts, must
-                be absolute to external resources. Stylesheets will be saved
-                into the Github repo, and detected changes that violate the
-                guidelines are cause for removal.
-              </p>
-              <p>
-                Ensure your design is responsive, and that it passes accessible
-                contrast (we'll be using aXe to verify). Animations should be
-                removed via `prefers-reduced-motion`. Cutting-edge techniques
-                should come with a fallback if needed to not severely impact the
-                user experience. No content may be permanently hidden, and
-                hidden items must come with an accessible viewing technique.
-                Page load time should not exceed 3 seconds.
-              </p>
-              <p>
-                Most importantly - have fun and learn something new! Check out
-                the
-                <a href="/resources/">resources</a> for tips and inspiration.
+                be the compiled, unminified CSS.
               </p>
               <a href="/guidelines/" className="link-guidelines">
                 Review full guidelines
@@ -182,43 +156,8 @@ export default function Home() {
                 All who enjoy the craft of writing CSS are welcome to
                 contribute!
               </p>
-              <p>
-                By participating as a contributor, your work will be shared with
-                your provided attribution as long as Style Stage is online, your
-                stylesheet link and any asset links remain valid, and all{" "}
-                <a href="/guidelines/">contributor guidelines</a> are adhered
-                to.
-              </p>
             </section>
-            <section className="container">
-              <h3>Steps to Contribute</h3>
-              <ol>
-                <li>
-                  Download the source files listed below to use as a reference
-                  to build your stylesheet.
-                </li>
-                <li>
-                  Host your completed stylesheet at a public URL, and ensure all
-                  asset links are absolute URLs to external resources.
-                </li>
-                <li>
-                  <a href="https://github.com/5t3ph/stylestage">
-                    Create a pull request
-                  </a>{" "}
-                  to add your information as a unique .json file to:
-                  src/_data/styles. The schema is detailed in the repo README,
-                  and you can review the FAQ on
-                  <a href="/guidelines/#how-do-i-create-a-pull-request-pr">
-                    creating a pull request
-                  </a>
-                  .
-                </li>
-                <li>
-                  If your contribution abides by the previously listed
-                  guidelines, your submission will be added!
-                </li>
-              </ol>
-            </section>
+
             <footer id="files">
               <div className="container">
                 <h3>Source Files</h3>
@@ -307,14 +246,6 @@ export default function Home() {
           <a href="/styles/" className="link-allstyles">
             View All Styles
           </a>
-        </div>
-      </aside>
-      <footer className="page-footer">
-        <div className="container">
-          <p>
-            Created and maintained by
-            <a href="https://twitter.com/5t3ph">Stephanie Eckles (@5t3ph)</a>
-          </p>
           <ul>
             <li>
               <a
@@ -324,48 +255,21 @@ export default function Home() {
                 Contact on Twitter
               </a>
             </li>
+          </ul>
+        </div>
+      </aside>
+      <footer className="page-footer">
+        <div className="container">
+          <ul>
             <li>
               <a
-                href="https://github.com/5t3ph/stylestage"
-                className="link-github"
+                href="https://twitter.com/5t3ph"
+                className="link-twittercontact"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 32 32"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path d="M32 12.408l-11.056-1.607-4.944-10.018-4.944 10.018-11.056 1.607 8 7.798-1.889 11.011 9.889-5.199 9.889 5.199-1.889-11.011 8-7.798z"></path>
-                </svg>
-                Star on Github
-              </a>
-            </li>
-            <li>
-              <a href="/feed/" className="link-rss">
-                RSS Feed
-              </a>
-            </li>
-            <li>
-              <a href="/subscribe/" className="link-support">
-                Subscribe to Updates
+                Contact on Twitter
               </a>
             </li>
           </ul>
-          <p>
-            Crafted with semantic, accessible HTML and CSS,{" "}
-            <strong>Style Stage</strong> is generated with{" "}
-            <a href="https://11ty.dev">11ty</a> and hosted on
-            <a href="https://netlify.com">Netlify</a>. This project uses
-            <a href="https://postcss.org/">PostCSS</a> with
-            <a href="https://github.com/postcss/autoprefixer">autoprefixer</a>.
-          </p>
-          <p>
-            Contributors retain copyright of all graphics used, and styles are
-            available under
-            <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/">
-              CC BY-NC-SA
-            </a>
-          </p>
         </div>
       </footer>
     </>
